@@ -68,7 +68,7 @@ var (
 	)
 
 	reportsLabels = []string{"pod"}
-	reportsTotal = prometheus.NewCounterVec(
+	reportsTotal  = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: reportsMetric,
 			Help: "Total number of telemetry reports received",
@@ -228,7 +228,7 @@ func (s *server) ListPods(ctx context.Context, req *read.ListPodsRequest) (*publ
 	// report from that instance.
 	reports := make(map[string]time.Time)
 	// Query Prometheus for reports in the last 30 seconds.
-	res, err := s.prometheusAPI.Query(ctx, reportsMetric + "[30s]", time.Time{})
+	res, err := s.prometheusAPI.Query(ctx, reportsMetric+"[30s]", time.Time{})
 	if err != nil {
 		return nil, err
 	}
