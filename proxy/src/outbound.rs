@@ -19,7 +19,7 @@ use control::{self, discovery};
 use control::discovery::Bind as BindTrait;
 use ctx;
 use fully_qualified_authority::{FullyQualifiedAuthority, NamedAddress};
-use time::{Timer, NewTimeout};
+use time::{NewTimeout, Timer, Timeout};
 
 type BindProtocol<B, T> = bind::BindProtocol<Arc<ctx::Proxy>, B, T>;
 
@@ -42,6 +42,8 @@ impl<B, T> Outbound<B, T> {
                default_zone: Option<String>,
                bind_timeout: Duration,)
                -> Outbound<B, T>
+    where
+        T: Timer,
     {
         let bind_timeout = bind
             .timer()
