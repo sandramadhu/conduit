@@ -57,10 +57,11 @@ fn outbound_updates_newer_services() {
 }
 
 #[test]
-#[cfg_attr(not(feature = "flaky_tests"), ignore)]
 fn outbound_times_out() {
     let _ = env_logger::try_init();
     let mut env = config::TestEnv::new();
+
+    let (mock_timer, time) = timer::mock();
 
     // set the bind timeout to 100 ms.
     env.put(config::ENV_BIND_TIMEOUT, "100".to_owned());
@@ -71,7 +72,8 @@ fn outbound_times_out() {
         // when the proxy requests the destination, sleep for 500 ms, and then
         // return the correct destination
         .destination_fn("disco.test.svc.cluster.local", move || {
-            thread::sleep(Duration::from_millis(500));
+            let mut time = time.clone();
+            time += Duration::from_millis(500);
             Some(controller::destination_update(addr))
         })
         .run();
@@ -79,6 +81,7 @@ fn outbound_times_out() {
     let proxy = proxy::new()
         .controller(ctrl)
         .outbound(srv)
+        .timer(mock_timer)
         .run_with_test_env(env);
 
     let client = client::http2(proxy.outbound, "disco.test.svc.cluster.local");

@@ -66,7 +66,7 @@ impl<T> Proxy<T> {
         self
     }
 
-        pub fn timer<I>(self, timer: I) -> Proxy<I> {
+    pub fn timer<I>(self, timer: I) -> Proxy<I> {
         Proxy {
             controller: self.controller,
             inbound: self.inbound,
