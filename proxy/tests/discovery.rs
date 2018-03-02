@@ -1,8 +1,6 @@
 mod support;
 use self::support::*;
 
-use std::thread;
-
 #[test]
 fn outbound_asks_controller_api() {
     let _ = env_logger::try_init();
