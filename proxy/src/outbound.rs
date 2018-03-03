@@ -70,7 +70,7 @@ where
     T: Timer + 'static,
 {
     type Request = http::Request<B>;
-    type Response = bind::HttpResponse;
+    type Response = bind::HttpResponse<T>;
     type Error = <Self::Service as tower::Service>::Error;
     type Key = (Destination, Protocol);
     type RouteError = bind::BufferSpawnError;
@@ -178,7 +178,7 @@ where
 {
     type Key = SocketAddr;
     type Request = http::Request<B>;
-    type Response = bind::HttpResponse;
+    type Response = bind::HttpResponse<T>;
     type Error = <bind::Service<B, T> as tower::Service>::Error;
     type Service = bind::Service<B, T>;
     type DiscoverError = BindError;

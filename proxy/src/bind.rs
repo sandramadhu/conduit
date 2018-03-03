@@ -28,7 +28,7 @@ use time::{Timer, Timeout};
 /// Buffering is not bounded and no timeouts are applied.
 pub struct Bind<C, B, T> {
     ctx: C,
-    sensors: telemetry::Sensors,
+    sensors: telemetry::Sensors<T>,
     executor: Handle,
     req_ids: Arc<AtomicUsize>,
     timer: T,
@@ -50,12 +50,22 @@ pub enum Protocol {
 
 pub type Service<B, T> = Reconnect<NewHttp<B, T>>;
 
-pub type NewHttp<B, T> = sensor::NewHttp<Client<B, T>, B, HttpBody>;
+pub type NewHttp<B, T> = sensor::NewHttp<
+    Client<B, T>,
+    B,
+    HttpBody,
+    T
+>;
 
-pub type HttpResponse = http::Response<sensor::http::ResponseBody<HttpBody>>;
+pub type HttpResponse<T> = http::Response<
+    sensor::http::ResponseBody<HttpBody, T>,
+>;
 
 pub type Client<B, T> = transparency::Client<
-    sensor::Connect<Timeout<transport::Connect, T>>,
+    sensor::Connect<
+        Timeout<transport::Connect, T>,
+        T,
+    >,
     B,
 >;
 
@@ -85,19 +95,19 @@ impl Error for BufferSpawnError {
     fn cause(&self) -> Option<&Error> { None }
 }
 
-impl<B, T> Bind<(), B, T> {
+impl<B, T: Timer> Bind<(), B, T> {
     pub fn new(executor: Handle, timer: T) -> Self {
         Self {
             executor,
             ctx: (),
-            sensors: telemetry::Sensors::null(),
+            sensors: telemetry::Sensors::null(&timer),
             req_ids: Default::default(),
             timer,
             _p: PhantomData,
         }
     }
 
-    pub fn with_sensors(self, sensors: telemetry::Sensors) -> Self {
+    pub fn with_sensors(self, sensors: telemetry::Sensors<T>) -> Self {
         Self {
             sensors,
             ..self
@@ -207,7 +217,7 @@ where
     T: Timer + 'static,
 {
     type Request = http::Request<B>;
-    type Response = HttpResponse;
+    type Response = HttpResponse<T>;
     type Error = <Service<B, T> as tower::Service>::Error;
     type Service = Service<B, T>;
     type BindError = ();
