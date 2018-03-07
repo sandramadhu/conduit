@@ -1,12 +1,12 @@
 use support::*;
-use support::time::Timer;
+use support::time::{Timer, LazyReactorTimer};
 
 use std::error::Error;
 use std::sync::{Arc, Mutex};
 
 use convert::TryFrom;
 
-pub fn new() -> Proxy<tokio_timer::Timer> {
+pub fn new() -> Proxy<LazyReactorTimer> {
     Proxy::new()
 }
 
@@ -30,7 +30,7 @@ pub struct Listening {
     shutdown: Shutdown,
 }
 
-impl Proxy<tokio_timer::Timer> {
+impl Proxy<LazyReactorTimer> {
     pub fn new() -> Self {
         Proxy {
             controller: None,
@@ -39,7 +39,7 @@ impl Proxy<tokio_timer::Timer> {
 
             metrics_flush_interval: None,
 
-            timer: tokio_timer::Timer::default(),
+            timer: LazyReactorTimer::uninitialized(),
         }
     }
 }

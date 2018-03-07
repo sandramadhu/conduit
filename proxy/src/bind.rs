@@ -17,7 +17,7 @@ use ctx;
 use telemetry::{self, sensor};
 use transparency::{self, HttpBody};
 use transport;
-use time::{Timer, Timeout};
+use time::Timer;
 
 /// Binds a `Service` from a `SocketAddr`.
 ///
@@ -63,7 +63,7 @@ pub type HttpResponse<T> = http::Response<
 
 pub type Client<B, T> = transparency::Client<
     sensor::Connect<
-        Timeout<transport::Connect, T>,
+        transport::Connect,
         T,
     >,
     B,
